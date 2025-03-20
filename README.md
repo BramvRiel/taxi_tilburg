@@ -7,11 +7,11 @@ Inschatting maken wanneer passagiers weer willen vertrekken vanaf locatie; kijke
 ## Fase 1 MVP:
 ### database:
 5 tabellen
-locaties
-locaties_afstanden
-locaties_reistijden
-passagiers
-voertuigen
+- locaties
+- locaties_afstanden
+- locaties_reistijden
+- reizigers
+- voertuigen
 
 ### UI:
 #### Excel import pagina
