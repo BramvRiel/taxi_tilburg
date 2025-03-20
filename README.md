@@ -1,6 +1,7 @@
 # taxi_tilburg
 
 Ik denk aan taxi's laten reiden naar centraal gelegen locatie, waarschijnlijk station.
+
 Inschatting maken wanneer passagiers weer willen vertrekken vanaf locatie; kijken naar de volgende route.
 
 Fase 1 MVP:
