@@ -1,8 +1,7 @@
 # taxi_tilburg
 
-Ik denk aan taxi's laten reiden naar centraal gelegen locatie, waarschijnlijk station.
-
-Inschatting maken wanneer passagiers weer willen vertrekken vanaf locatie; kijken naar de volgende route.
+Ik denk aan taxi's laten reiden naar centraal gelegen locatie, waarschijnlijk station. Ten gunste van taxibedrijf.
+Of, kijken naar reeds geplande routes. Alvast klaar gaan staan. Ten gunste van reiziger.
 
 ## Fase 1 MVP:
 ### database:
