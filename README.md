@@ -5,45 +5,59 @@ De planner moet zorgen dat de reisbehoefte zo efficient mogelijk wordt uitgevoer
 - zo weinig mogelijk totale reistijd
 - zo klein mogelijke afwijking van de gewenste vertrek- of aankomsttijd
 - zo veel mogelijk reizigers tegelijk per rit vervoeren
-- zo weinig mogelijk afstand tussen twee ritten van een voertuig
+- zo weinig mogelijk tijd tussen twee ritten van een voertuig
 
 ### Database:
-- locaties
-- locaties_afstanden
-- locaties_reistijden
-- reizigers
-- voertuigen
+- locations
+- locations_connections
+- travelers
+- vehicles
 
-<!-- ### UI:
-#### Excel import pagina
-+ formulier
-+ resultaat
-
-#### route maker pagina
-+ vertrektijd
-+ route bouwer
-+ aankomsttijd
-+ totaal km
-+ totaal h m s
-
-## Fase 2 Optimalisatie:
-slimme SQL query
-default route voor route maker pagina
-
-## Fase 3 Routeplanner:
-Meerdere routes klaarzetten
-routes optimaliseren -->
+### API:
+#### Database
+- locations
+- locatie/{id}
+- travelers
+- traveler/{id}
+- vehicles
+- vehicle/{id}
+#### Excel
+- upload
+- locations
+- locations-distances
+- locations-traveltimes
+- travelers
+- vehicles
+#### Logic
+- shortest-route
 
 ## Issues:
 #### Foutmeldig bij File Upload;
-- UseAntiforgery(); 
-- UseCors();
-*disabled*
+Authentication header moest aanwezig zijn, danwel client certificate, danwel cookie.
+
+Oplossing: *DisableAntiforgery*
+
 #### Excel import EPPlus ipv Microsoft.Interop
-- Microsoft.Interop kan niet overweg met stream, moest file locatie zijn.
+Microsoft.Interop kan niet overweg met stream, moest file locatie zijn.
+
+Oplossing: EPPlus gebruiken
+
+#### Duizendtallen in Excel
+
+Oplossing: Convert via CultureInfo DE
+
+#### Ja / Nee in Excel
+Oplossing: Letterlijk als "Ja" dan true
+
 #### Leesbaarheid in program.cs:
-- Wildgroei aan calls.
-- Veel calls die op elkaar leken.
-*gegroepeerd* *handler methode*
+Wildgroei aan calls.
+
+Oplossing: Gewrapped in handler methode, gebruikgemaakt van interfaces
+
 #### Koppeltabel know-how
-- Moest opzoeken hoe je koppeltabel configureerd in DbContext
+Andere entiteiten gingen vanzelf, EF had moeitje met de koppeltabellen. Ik wilde dit niet doen via annotaties.
+
+Oplossing: Voorbeeld gezocht en overgenomen.
+
+#### Route berekenen
+Oplossing: Via recursive code alle routes berekenen, kortste aanhouden.
