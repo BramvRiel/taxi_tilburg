@@ -1,9 +1,8 @@
 using System.Globalization;
 using OfficeOpenXml;
 using taxi_tilburg_backend.Database.Models;
-using taxi_tilburg_backend.Services;
 
-namespace Services;
+namespace taxi_tilburg_backend.Services;
 
 public class EPPlusExcelImporter : IExcelImporter
 {
@@ -27,13 +26,13 @@ public class EPPlusExcelImporter : IExcelImporter
         return this;
     }
 
-    public List<LocationDistance> GetLocationDistances()
+    public List<Models.Excel.LocationConnection> GetLocationDistances()
     {
         if (_package is null)
         {
             throw new ArgumentNullException("Package not initiated.");
         }
-        var result = new List<LocationDistance>();
+        var result = new List<Models.Excel.LocationConnection>();
         ExcelWorksheet worksheet = _package.Workbook.Worksheets[0]; // First sheet
         const int LocationDistancesTitle = 2;
         const int LocationDistancesRowStart = 3;
@@ -61,7 +60,7 @@ public class EPPlusExcelImporter : IExcelImporter
                     continue;
                 }
 
-                result.Add(new LocationDistance
+                result.Add(new Models.Excel.LocationConnection
                 {
                     StartingPointId = locationAId,
                     DistanceInKilometers = distanceInKm,
@@ -73,13 +72,13 @@ public class EPPlusExcelImporter : IExcelImporter
         return result;
     }
 
-    public List<Location> GetLocations()
+    public List<Models.Excel.Location> GetLocations()
     {
         if (_package is null)
         {
             throw new ArgumentNullException("Package not initiated.");
         }
-        var result = new List<Location>();
+        var result = new List<Models.Excel.Location>();
         ExcelWorksheet worksheet = _package.Workbook.Worksheets[0]; // First sheet
         const int LocationRowStart = 3;
         int rowCount = LocationRowStart + 10;
@@ -108,7 +107,7 @@ public class EPPlusExcelImporter : IExcelImporter
                 continue;
             }
 
-            result.Add(new Location
+            result.Add(new Models.Excel.Location
             {
                 Id = locationId,
                 Name = locationName,
@@ -120,13 +119,13 @@ public class EPPlusExcelImporter : IExcelImporter
         return result;
     }
 
-    public List<LocationTravelTime> GetLocationTravelTimes()
+    public List<Models.Excel.LocationConnection> GetLocationTravelTimes()
     {
         if (_package is null)
         {
             throw new ArgumentNullException("Package not initiated.");
         }
-        var result = new List<LocationTravelTime>();
+        var result = new List<Models.Excel.LocationConnection>();
         ExcelWorksheet worksheet = _package.Workbook.Worksheets[0]; // First sheet
         const int LocationTravelTimesTitle = 16;
         const int LocationTravelTimesRowStart = 17;
@@ -154,7 +153,7 @@ public class EPPlusExcelImporter : IExcelImporter
                     continue;
                 }
 
-                result.Add(new LocationTravelTime
+                result.Add(new Models.Excel.LocationConnection
                 {
                     StartingPointId = locationAId,
                     TravelTimeInSeconds = travelTimeInSeconds,

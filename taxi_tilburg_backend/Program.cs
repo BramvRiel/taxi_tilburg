@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Services;
 using taxi_tilburg_backend.Database;
 using taxi_tilburg_backend.Database.Models;
+using taxi_tilburg_backend.Models.Requests;
 using taxi_tilburg_backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,9 +11,9 @@ builder.Services.AddDbContext<TaxiTilburgContext>(opt => opt.UseInMemoryDatabase
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-builder.Services.AddScoped<ILocationDistanceRepository, LocationDistanceRepository>();
-builder.Services.AddScoped<ILocationTravelTimeRepository, LocationTravelTimeRepository>();
+builder.Services.AddScoped<ILocationConnectionRepository, LocationConnectionRepository>();
 builder.Services.AddScoped<IExcelImporter, EPPlusExcelImporter>();
+builder.Services.AddScoped<ILocationService, LocationService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApiDocument(config =>
 {
@@ -48,60 +48,24 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.MapGet("/location/list", async (ILocationRepository repo) =>
-    await repo.GetAllAsync())
-    .WithTags("Database");
-
-app.MapGet("/location/{id}", async (int id, ILocationRepository repo) =>
+app.MapGet("/database/locations", async (ILocationService locationService) =>
 {
-    return await repo.GetByIdAsync(id);
+    return await locationService.ListLocations();
 })
     .WithTags("Database");
 
-app.MapPost("/locationitems", async (Location todo, TaxiTilburgContext db) =>
+app.MapGet("/database/location/{id}", async (int id, ILocationService locationService) =>
 {
-    db.Locations.Add(todo);
-    await db.SaveChangesAsync();
-
-    return Results.Created($"/locationitems/{todo.Id}", todo);
+    return await locationService.GetLocationAsync(id);
 })
-.WithTags("Database");
-
-app.MapPut("/locationitems/{id}", async (int id, Location inputTodo, ILocationRepository repo) =>
-{
-    var todo = await repo.GetByIdAsync(id);
-
-    if (todo is null) return Results.NotFound();
-
-    todo.Name = inputTodo.Name;
-    todo.Latitude = inputTodo.Latitude;
-    todo.Longitude = inputTodo.Longitude;
-
-    await repo.UpdateAsync(todo);
-
-    return Results.NoContent();
-})
-.WithTags("Database");
-
-app.MapDelete("/locationitems/{id}", async (int id, ILocationRepository repo) =>
-{
-    if (await repo.GetByIdAsync(id) is Location todo)
-    {
-        await repo.DeleteAsync(id);
-        return Results.NoContent();
-    }
-
-    return Results.NotFound();
-})
-.WithTags("Database");
+    .WithTags("Database");
 
 app.MapPost("/upload", async (
     [FromServices] IExcelImporter excelImporter,
+    ILocationService locationService,
     IRepository<Location> locationRepo,
     IRepository<Traveler> travelerRepo,
     IRepository<Vehicle> vehicleRepo,
-    ILocationDistanceRepository distanceRepo,
-    ILocationTravelTimeRepository travelTimeRepo,
     IFormFile file) =>
 {
     if (file == null || file.Length == 0)
@@ -112,14 +76,14 @@ app.MapPost("/upload", async (
     using var stream = new MemoryStream();
     await file.CopyToAsync(stream);
     using var importer = excelImporter.FromStream(stream);
+
     var locations = importer.GetLocations();
-    locations.ForEach(async l =>
-    {
-        if (await locationRepo.GetByIdAsync(l.Id) is null)
-        {
-            await locationRepo.AddAsync(l);
-        }
-    });
+    locationService.AddLocation(locations);
+    var locationDistances = importer.GetLocationDistances();
+    await locationService.AddConnectionsAsync(locationDistances);
+    var locationTravelTimes = importer.GetLocationTravelTimes();
+    await locationService.AddConnectionsAsync(locationTravelTimes);
+
     var travelers = importer.GetTravelers();
     travelers.ForEach(async t =>
     {
@@ -134,22 +98,6 @@ app.MapPost("/upload", async (
         if (await vehicleRepo.GetByIdAsync(v.Id) is null)
         {
             await vehicleRepo.AddAsync(v);
-        }
-    });
-    var locationDistances = importer.GetLocationDistances();
-    locationDistances.ForEach(async ld =>
-    {
-        if (await distanceRepo.GetByIdAsync(ld.StartingPointId, ld.EndPointId) is null)
-        {
-            await distanceRepo.AddAsync(ld);
-        }
-    });
-    var locationTravelTimes = importer.GetLocationTravelTimes();
-    locationTravelTimes.ForEach(async lt =>
-    {
-        if (await travelTimeRepo.GetByIdAsync(lt.StartingPointId, lt.EndPointId) is null)
-        {
-            await travelTimeRepo.AddAsync(lt);
         }
     });
 })
@@ -196,6 +144,10 @@ RegisterExcelParsingEndpoint(app, "get-location-traveltimes", ([FromServices] ex
     return excelImporter.GetLocationTravelTimes();
 });
 
-app.MapGet("/", () => "Hello World!");
+app.MapPost("/logic/calculate-route", async (RouteRequest req, ILocationService locationService) =>
+{
+    return await locationService.CalculateRouteAsync(req);
+})
+    .WithTags("Logic");
 
 app.Run();

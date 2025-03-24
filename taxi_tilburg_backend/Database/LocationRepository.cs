@@ -9,19 +9,18 @@ public class LocationRepository : Repository<Location>, ILocationRepository
     {
     }
 
-    public new async Task<IEnumerable<Location>> GetAllAsync()
+    public new async Task<List<Location>> GetAllAsync()
     {
         return await _dbSet
-            .Include(l => l.LocationDistanceTo)
-            .Include(l => l.LocationTravelTimesFrom)
+            .Include(l => l.LocationConnectionsFrom)
             .ToListAsync();
     }
 
     public new async Task<Location?> GetByIdAsync(int id)
     {
         return await _dbSet
-            .Include(l => l.LocationDistanceTo)
-            .Include(l => l.LocationTravelTimesFrom)
+            .Include(l => l.LocationConnectionsFrom)
+            .ThenInclude(c => c.StartingPoint)
             .FirstOrDefaultAsync(l => l.Id == id);
     }
 }

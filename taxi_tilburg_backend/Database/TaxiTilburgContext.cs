@@ -8,38 +8,22 @@ public class TaxiTilburgContext(DbContextOptions<TaxiTilburgContext> options) : 
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<Traveler> Travelers => Set<Traveler>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
-    public DbSet<LocationDistance> LocationDistances => Set<LocationDistance>();
-    public DbSet<LocationTravelTime> LocationTravelTimes => Set<LocationTravelTime>();
+    public DbSet<LocationConnection> LocationConnections => Set<LocationConnection>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<LocationDistance>()
+        modelBuilder.Entity<LocationConnection>()
         .HasKey(e => new { e.StartingPointId, e.EndPointId });
 
-        modelBuilder.Entity<LocationDistance>()
+        modelBuilder.Entity<LocationConnection>()
         .HasOne(e => e.StartingPoint)
-        .WithMany(e => e.LocationDistanceTo)
+        .WithMany(e => e.LocationConnectionsTo)
         .HasForeignKey(e => e.StartingPointId)
         .OnDelete(DeleteBehavior.Restrict);
 
-        modelBuilder.Entity<LocationDistance>()
+        modelBuilder.Entity<LocationConnection>()
         .HasOne(e => e.EndPoint)
-        .WithMany(e => e.LocationDistanceFrom)
-        .HasForeignKey(e => e.EndPointId)
-        .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<LocationTravelTime>()
-        .HasKey(e => new { e.StartingPointId, e.EndPointId });
-
-        modelBuilder.Entity<LocationTravelTime>()
-        .HasOne(e => e.StartingPoint)
-        .WithMany(e => e.LocationTravelTimesTo)
-        .HasForeignKey(e => e.StartingPointId)
-        .OnDelete(DeleteBehavior.Restrict);
-
-        modelBuilder.Entity<LocationTravelTime>()
-        .HasOne(e => e.EndPoint)
-        .WithMany(e => e.LocationTravelTimesFrom)
+        .WithMany(e => e.LocationConnectionsFrom)
         .HasForeignKey(e => e.EndPointId)
         .OnDelete(DeleteBehavior.Restrict);
 

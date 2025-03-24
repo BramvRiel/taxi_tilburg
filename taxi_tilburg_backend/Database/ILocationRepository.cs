@@ -4,5 +4,5 @@ namespace taxi_tilburg_backend.Database;
 
 public interface ILocationRepository : IRepository<Location>
 {
-    new Task<IEnumerable<Location>> GetAllAsync();
+    new Task<List<Location>> GetAllAsync();
 }
