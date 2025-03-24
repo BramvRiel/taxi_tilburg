@@ -12,15 +12,14 @@ public class LocationRepository : Repository<Location>, ILocationRepository
     public new async Task<List<Location>> GetAllAsync()
     {
         return await _dbSet
-            .Include(l => l.LocationConnectionsFrom)
             .ToListAsync();
     }
 
     public new async Task<Location?> GetByIdAsync(int id)
     {
         return await _dbSet
-            .Include(l => l.LocationConnectionsFrom)
-            .ThenInclude(c => c.StartingPoint)
+            .Include(l => l.LocationConnectionsTo)
+            .ThenInclude(c => c.EndPoint)
             .FirstOrDefaultAsync(l => l.Id == id);
     }
 }

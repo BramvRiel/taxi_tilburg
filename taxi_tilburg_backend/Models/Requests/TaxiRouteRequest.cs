@@ -6,7 +6,7 @@ public class TaxiRouteRequest
 {
     [DefaultValue(1)]
     public int StartingPointId { get; set; }
-    [DefaultValue(new int[] { 2,3,4,5,6,7,8,9})]
+    [DefaultValue(new int[] { 2,3,4,5,6,7,8,9,10})]
     public int[] Stops { get; set; } = [];
     [DefaultValue(1)]
     public int? EndPointId { get; set; }

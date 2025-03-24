@@ -149,9 +149,9 @@ internal class LocationService : ILocationService
         {
             Id = location.Id,
             Name = location.Name,
-            Connections = [.. location.LocationConnectionsFrom.Select(con => new LocationConnectionItem {
-                Id = con.StartingPoint.Id,
-                Name = con.StartingPoint.Name,
+            CanTravelTo = [.. location.LocationConnectionsTo.Select(con => new LocationConnectionItem {
+                Id = con.EndPoint.Id,
+                Name = con.EndPoint.Name,
                 DistanceInKilometers = con.DistanceInKilometers,
                 TravelTimeInSeconds = con.TravelTimeInSeconds
              })]

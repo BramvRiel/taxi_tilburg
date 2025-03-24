@@ -4,5 +4,5 @@ public class LocationItem
 {
     public int Id { get; set; }
     public string? Name { get; set; }
-    public List<LocationConnectionItem> Connections { get; set; } = [];
+    public List<LocationConnectionItem> CanTravelTo { get; set; } = [];
 }

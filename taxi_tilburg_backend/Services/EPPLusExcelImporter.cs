@@ -49,7 +49,7 @@ public class EPPlusExcelImporter : IExcelImporter
             for (int col = LocationDistanceColStart; col <= colCount; col++)
             {
                 var distance = worksheet.Cells[row, col].Text;
-                if (!int.TryParse(distance, NumberStyles.AllowThousands, CultureInfo.GetCultureInfo("de"), out var distanceInKm))
+                if (!decimal.TryParse(distance, CultureInfo.CurrentCulture, out var distanceInKm))
                 {
                     continue;
                 }
