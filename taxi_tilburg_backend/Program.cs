@@ -144,7 +144,7 @@ RegisterExcelParsingEndpoint(app, "get-location-traveltimes", ([FromServices] ex
     return excelImporter.GetLocationTravelTimes();
 });
 
-app.MapPost("/logic/calculate-route", async (RouteRequest req, ILocationService locationService) =>
+app.MapPost("/logic/calculate-route", async (TaxiRouteRequest req, ILocationService locationService) =>
 {
     return await locationService.CalculateRouteAsync(req);
 })

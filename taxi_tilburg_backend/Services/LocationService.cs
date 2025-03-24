@@ -71,9 +71,53 @@ internal class LocationService : ILocationService
     });
     }
 
-    public Task<TaxiRoute> CalculateRouteAsync(RouteRequest req)
+    public async Task<TaxiRoute?> CalculateRouteAsync(TaxiRouteRequest req)
     {
-        throw new NotImplementedException();
+        var connections = await connectionRepository.GetAllAsync();
+
+        // Default route
+        var route = new TaxiRoute();
+        int distance = 0;
+        int travelTime = 0;
+        route.Stops.Add(new TaxiStop { Id = req.StartingPointId });
+        foreach (var stop in req.Stops)
+        {
+            var connection = connections.FirstOrDefault(c =>
+                c.StartingPointId == route.Stops.Last().Id
+                && c.EndPointId == stop);
+            if (connection is null)
+            {
+                continue;
+            }
+            distance += connection.DistanceInKilometers;
+            travelTime += connection.TravelTimeInSeconds;
+            route.Stops.Add(new TaxiStop
+            {
+                Id = stop,
+                TotalDistance = distance,
+                TotalTravelTime = travelTime
+            });
+        }
+        if (req.EndPointId is not null)
+        {
+            var endPointId = req.EndPointId.Value;
+            var connection = connections.FirstOrDefault(c =>
+                c.StartingPointId == route.Stops.Last().Id
+                && c.EndPointId == endPointId);
+            if (connection is not null)
+            {
+                distance += connection.DistanceInKilometers;
+                travelTime += connection.TravelTimeInSeconds;
+                route.Stops.Add(new TaxiStop
+                {
+                    Id = req.EndPointId.Value,
+                    TotalDistance = distance,
+                    TotalTravelTime = travelTime
+                });
+            }
+        }
+
+        return route;
     }
 
     public async Task<LocationItem?> GetLocationAsync(int id)

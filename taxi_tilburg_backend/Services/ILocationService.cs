@@ -9,5 +9,5 @@ interface ILocationService
     void AddLocation(List<Models.Excel.Location> locations);
     Task AddConnectionsAsync(List<Models.Excel.LocationConnection> locationDistances);
     Task<LocationItem?> GetLocationAsync(int id);
-    Task<TaxiRoute> CalculateRouteAsync(RouteRequest req);
+    Task<TaxiRoute?> CalculateRouteAsync(TaxiRouteRequest req);
 }
