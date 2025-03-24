@@ -57,67 +57,84 @@ internal class LocationService : ILocationService
     public void AddLocation(List<Location> locations)
     {
         locations.ForEach(async l =>
-    {
-        if (await locationRepository.GetByIdAsync(l.Id) is null)
         {
-            await locationRepository.AddAsync(new Database.Models.Location
+            if (await locationRepository.GetByIdAsync(l.Id) is null)
             {
-                Id = l.Id,
-                Name = l.Name,
-                Latitude = l.Latitude,
-                Longitude = l.Longitude,
-            });
-        }
-    });
+                await locationRepository.AddAsync(new Database.Models.Location
+                {
+                    Id = l.Id,
+                    Name = l.Name,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude,
+                });
+            }
+        });
     }
 
     public async Task<TaxiRoute?> CalculateRouteAsync(TaxiRouteRequest req)
     {
         var connections = await connectionRepository.GetAllAsync();
-
-        // Default route
-        var route = new TaxiRoute();
-        int distance = 0;
-        int travelTime = 0;
-        route.Stops.Add(new TaxiStop { Id = req.StartingPointId });
-        foreach (var stop in req.Stops)
+        if (connections.Count == 0)
         {
-            var connection = connections.FirstOrDefault(c =>
-                c.StartingPointId == route.Stops.Last().Id
-                && c.EndPointId == stop);
-            if (connection is null)
-            {
-                continue;
-            }
-            distance += connection.DistanceInKilometers;
-            travelTime += connection.TravelTimeInSeconds;
-            route.Stops.Add(new TaxiStop
-            {
-                Id = stop,
-                TotalDistance = distance,
-                TotalTravelTime = travelTime
-            });
+            throw new ArgumentException("No connections found. Upload not yet completed.");
         }
+
+        return GetOptimalRoute(req, connections);
+    }
+
+    private static TaxiRoute? GetOptimalRoute(TaxiRouteRequest req, List<Database.Models.LocationConnection> connections)
+    {
+        var routes = new List<TaxiRoute>();
+        var route = new TaxiRoute();
+        route.Stops.Add(new TaxiStop { Id = req.StartingPointId });
+
+        GetAllRoutes(req.Stops, route, connections, routes);
+
         if (req.EndPointId is not null)
         {
-            var endPointId = req.EndPointId.Value;
-            var connection = connections.FirstOrDefault(c =>
-                c.StartingPointId == route.Stops.Last().Id
-                && c.EndPointId == endPointId);
-            if (connection is not null)
+            for (var i = 0; i < routes.Count; i++)
             {
-                distance += connection.DistanceInKilometers;
-                travelTime += connection.TravelTimeInSeconds;
-                route.Stops.Add(new TaxiStop
-                {
-                    Id = req.EndPointId.Value,
-                    TotalDistance = distance,
-                    TotalTravelTime = travelTime
-                });
+                routes[i] = AddStopToRoute(req.EndPointId.Value, routes[i], connections);
             }
         }
 
-        return route;
+        return routes.GroupBy(r => r.Stops.Last().TotalDistance).OrderBy(g => g.Key).FirstOrDefault()?.FirstOrDefault();
+    }
+
+    private static void GetAllRoutes(int[] stops, TaxiRoute route, List<Database.Models.LocationConnection> connections, List<TaxiRoute> routes)
+    {
+        if (route.Stops.Count == stops.Length + 1)
+        {
+            routes.Add(new TaxiRoute { Stops = [.. route.Stops] });
+            return;
+        }
+
+        foreach (var stop in stops)
+        {
+            if (!route.Stops.Select(s => s.Id).Contains(stop))
+            {
+                var newRoute = AddStopToRoute(stop, route, connections);
+                GetAllRoutes(stops, newRoute, connections, routes);
+            }
+        }
+    }
+
+    private static TaxiRoute AddStopToRoute(int stop, TaxiRoute route, List<Database.Models.LocationConnection> connections)
+    {
+        var newRoute = new TaxiRoute
+        {
+            Stops = [.. route.Stops]
+        };
+        var connection = connections.FirstOrDefault(c =>
+                c.StartingPointId == route.Stops.Last().Id
+                && c.EndPointId == stop) ?? throw new InvalidOperationException("No connection can be made to designated stop");
+        newRoute.Stops.Add(new TaxiStop
+        {
+            Id = stop,
+            TotalDistance = newRoute.Stops.Last().TotalDistance + connection.DistanceInKilometers,
+            TotalTravelTime = newRoute.Stops.Last().TotalTravelTime + connection.TravelTimeInSeconds
+        });
+        return newRoute;
     }
 
     public async Task<LocationItem?> GetLocationAsync(int id)
