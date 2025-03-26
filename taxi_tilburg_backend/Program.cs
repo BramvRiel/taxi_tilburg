@@ -21,7 +21,6 @@ builder.Services.AddOpenApiDocument(config =>
     config.Title = "TaxiTilburgAPI v1";
     config.Version = "v1";
 });
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowedOrigins", policy =>
@@ -47,6 +46,8 @@ if (app.Environment.IsDevelopment())
         config.DocExpansion = "list";
     });
 }
+
+app.UseHttpsRedirection(); // Forceert HTTPS-omleiding
 
 app.MapGet("/database/locations", async (ILocationService locationService) =>
 {
@@ -103,7 +104,7 @@ app.MapPost("/upload", async (
 })
 .WithTags("Excel import")
 .RequireCors("AllowedOrigins")
-.DisableAntiforgery(); // todo
+.DisableAntiforgery();
 
 void RegisterExcelParsingEndpoint<T>(WebApplication app, string route, Func<IExcelImporter, IFormFile, List<T>> handler)
 {

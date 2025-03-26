@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class LocationsService {
-  private heroesUrl = 'http://localhost:5102/database/locations';
+  private heroesUrl = 'https://localhost:7084/database/locations';
 
   constructor(private http: HttpClient) { }
 
