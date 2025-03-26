@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowedOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:5102") // Add trusted domains
+        policy.WithOrigins("http://localhost:5102", "http://localhost:4200") // Add trusted domains
               .AllowAnyMethod()
               .AllowAnyHeader();
     });

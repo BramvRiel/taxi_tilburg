@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { Location } from '../location';
-import { DEFAULT_LOCATIONS } from '../mock-locations';
 import { CommonModule, NgFor } from '@angular/common';
 import { LocationDetailComponent } from '../location-detail/location-detail.component';
+import { LocationsService } from '../locations.service';
 
 @Component({
   selector: 'app-location',
@@ -12,7 +12,18 @@ import { LocationDetailComponent } from '../location-detail/location-detail.comp
   styleUrl: './location.component.scss'
 })
 export class LocationComponent {
-  locations = DEFAULT_LOCATIONS;
+  locations: Location[] = [];
+  constructor(private locationsService: LocationsService) { }
+
+  ngOnInit(): void {
+    this.getHeroes();
+  }
+
+  getHeroes(): void {
+    this.locationsService.getHeroes()
+      .subscribe(heroes => this.locations = heroes);
+  }
+
   selectedLocation?: Location;
 
   onSelect(location: Location): void {
