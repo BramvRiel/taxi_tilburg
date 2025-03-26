@@ -1,0 +1,10 @@
+<div *ngIf="location">
+
+    <h2>{{location.name | uppercase}} Details</h2>
+    <div><span>id: </span>{{location.id}}</div>
+    <div>
+        <label for="location-name">Location name: </label>
+        <input id="location-name" [(ngModel)]="location.name" placeholder="name">
+    </div>
+
+</div>
