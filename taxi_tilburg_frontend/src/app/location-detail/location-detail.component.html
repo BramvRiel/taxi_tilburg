@@ -2,6 +2,9 @@
 
     <h2>{{location.name | uppercase}} Details</h2>
     <div><span>id: </span>{{location.id}}</div>
+    <li *ngFor="let destination of location.canTravelTo">
+        {{destination.id}} - {{destination.name}} ({{destination.distanceInKilometers}} km, {{destination.travelTimeInSeconds}} seconden)
+    </li>
     <div>
         <label for="location-name">Location name: </label>
         <input id="location-name" [(ngModel)]="location.name" placeholder="name">

@@ -1,20 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Location } from './location';
 import { Observable, of } from 'rxjs';
-//import { DEFAULT_LOCATIONS } from './mock-locations';
 import { HttpClient } from '@angular/common/http';
+import { format } from './string-utils'; // Import the format function
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class LocationsService {
-  private heroesUrl = 'https://localhost:7084/database/locations';
+  private locationsUrl = 'https://localhost:7084/database/locations';
+  private locationDetailsUrl = 'https://localhost:7084/database/location/{id}';
 
   constructor(private http: HttpClient) { }
 
-  getHeroes(): Observable<Location[]> {
-    return this.http.get<Location[]>(this.heroesUrl);
-    //const heroes = of(DEFAULT_LOCATIONS);
-    //return heroes;
+  getLocations(): Observable<Location[]> {
+    const locations = this.http.get<Location[]>(this.locationsUrl);
+    return locations;
+  }
+
+  getLocationDetails(locationId: number): Observable<Location> {
+    return this.http.get<Location>(format(this.locationDetailsUrl, { id: locationId }));
   }
 }

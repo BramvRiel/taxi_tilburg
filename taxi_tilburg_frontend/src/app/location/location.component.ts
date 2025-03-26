@@ -16,12 +16,20 @@ export class LocationComponent {
   constructor(private locationsService: LocationsService) { }
 
   ngOnInit(): void {
-    this.getHeroes();
+    this.getLocations();
   }
 
-  getHeroes(): void {
-    this.locationsService.getHeroes()
-      .subscribe(heroes => this.locations = heroes);
+  getLocations(): void {
+    this.locationsService.getLocations()
+      .subscribe(locations => {
+        this.locations = locations;
+        for (let i = 0; i < this.locations.length; i++) {
+          this.locationsService.getLocationDetails(this.locations[i].id)
+            .subscribe(location => {
+              this.locations[i].canTravelTo = location.canTravelTo;
+            });
+        }
+      });
   }
 
   selectedLocation?: Location;
